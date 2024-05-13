@@ -42,33 +42,32 @@ class Grabber:
         if latest_lobby.timestamp < timestamp:
             latest_lobby = self._get_latest_live_lobby()
 
-        FIFTEEN_MINUTES = 60 * 15
+        initial_guess = self._get_initial_guess(latest_lobby)
 
-        # while True:
-        #     try:
-        #         delta_id = 15000
-        #         guess_id = latest_lobby.mp_id - delta_id
-        #         guess = self.api.get_match(guess_id)
-        #         break
-        #     except:
-        #         delta_id += 1
+        self._search_id(initial_guess, latest_lobby, timestamp)
 
-        # while True:
-        #     guess_time: datetime.datetime = guess.match.start_time  # type: ignore
-        #     delta_time = (latest_lobby.timestamp - guess_time).total_seconds()
+    def _get_initial_guess(self, initial_lobby: Lobby):
+        while True:
+            try:
+                delta_id = 15000
+                guess_id = initial_lobby.mp_id - delta_id
+                guess = self.api.get_match(guess_id)
+                return Lobby(guess.match.start_time.isoformat(), guess_id)
+            except:
+                delta_id += 1
 
-        #     if (timestamp - guess_time).total_seconds() < FIFTEEN_MINUTES:
+    def _search_id(
+        self, left_lobby: Lobby, right_lobby: Lobby, lookup_time: datetime.datetime
+    ) -> int:
+        while True:
+            delta_id = right_lobby.mp_id - left_lobby.mp_id
+            delta_time = (right_lobby.timestamp - left_lobby.timestamp).total_seconds()
 
-        #     slope = delta_id / delta_time
+            slope = delta_id / delta_time  # positive direction: left
 
-        #     delta_id = int(slope * (latest_lobby.timestamp - timestamp).total_seconds())
-        #     guess_id -= delta_id
-        #     while True:
-        #         try:
-        #             guess = self.api.get_match(guess_id)
-        #             break
-        #         except:
-        #             guess_id -= sign(delta_id)
+            delta_time_lookup = (right_lobby.timestamp - lookup_time).total_seconds()
+
+            slope * delta_time_lookup
 
     def _get_latest_local_lobby(self) -> Lobby:
         with open(get_absolute_path(__file__, "latest_local_lobby.json")) as log_file:
