@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 @dataclass
@@ -9,4 +9,4 @@ class Lobby:
     timestamp: datetime = field(init=False)
 
     def __post_init__(self):
-        self.timestamp = datetime.fromisoformat(self.timestamp_raw)
+        self.timestamp = datetime.fromisoformat(self.timestamp_raw).replace(tzinfo=UTC)

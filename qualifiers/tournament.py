@@ -9,7 +9,7 @@ from .tourney_ruleset import Ruleset
 
 class Tournament:
     def __init__(
-        self, osu_api_v1: OssapiV1, mp_ids: list[str], ruleset: Ruleset
+        self, osu_api_v1: OssapiV1, mp_ids: list[int], ruleset: Ruleset
     ) -> None:
         self.api = osu_api_v1
         self.mp_ids = mp_ids

@@ -1,13 +1,18 @@
 import os
+import sys
+from datetime import timedelta
 
 import ossapi
 from dotenv import load_dotenv
 
-from grabber import Grabber
+from scripts import get_qualifier_lobbies
+from utils import get_absolute_path
 
 
 def main() -> None:
     load_dotenv()
+
+    assert len(sys.argv) > 1, "CLI arguments must be passed."
 
     osu_api_v1_key = os.environ.get("OSU_API_V1_KEY")
     if osu_api_v1_key is None:
@@ -15,9 +20,17 @@ def main() -> None:
 
     api = ossapi.OssapiV1(osu_api_v1_key)
 
-    print(api.get_match(113855673))
-    # with Grabber(api) as grabber:
-    #     grabber._get_latest_live_lobby()
+    match sys.argv[1]:
+        case "get":
+            assert (
+                7 <= len(sys.argv) <= 9
+            ), "wrong amounts of arguments to 'get', check get_qualifier_lobbies signature"
+            try:
+                sys.argv[7] = timedelta(minutes=sys.argv[7])
+                sys.argv[8] = timedelta(minutes=sys.argv[8])
+            except IndexError:
+                pass
+            get_qualifier_lobbies(api, *sys.argv[2:])
 
 
 if __name__ == "__main__":
