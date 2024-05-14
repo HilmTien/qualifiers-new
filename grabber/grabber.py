@@ -1,8 +1,9 @@
 import datetime
 import json
 
-from ossapi import OssapiV1
+from ossapi.ossapi import MatchGame, MatchInfo, OssapiV1
 
+from settings import SETTINGS, get_mappool
 from utils import get_absolute_path
 
 from .live_grabber import LiveGrabber
@@ -29,7 +30,8 @@ class Grabber:
         scheduled_time: datetime.datetime,
         start_id: int,
         stop_time_offset: datetime.timedelta = datetime.timedelta(minutes=20),
-    ) -> int:
+        stop_time_recursion_offset: datetime.timedelta = datetime.timedelta(minutes=5),
+    ) -> list[int]:
         if self.acronym is None:
             raise ValueError("Tournament acronym for grabber is not set!")
 
@@ -52,20 +54,43 @@ class Grabber:
 
             index = lobby_name.lower().find(self.acronym)
             if index == 0:
-                return mp_id
+                if self.lobby_is_complete(data):
+                    return [mp_id]
+
+                return [
+                    mp_id,
+                ] + self.find_lobby(
+                    data.match.start_time,
+                    mp_id,
+                    (data.match.end_time - data.match.start_time)
+                    + stop_time_recursion_offset,
+                )
             elif index > 0:
                 print("sus: " + mp_id)
                 if input("verify id (y/n)").lower() == "y":
-                    return mp_id
+                    return [mp_id]
 
             mp_id += 1
+
+    def lobby_is_complete(self, lobby: MatchInfo) -> bool:
+        mappool = get_mappool()
+        games: list[MatchGame] = lobby.games
+        beatmaps = [game.beatmap_id for game in games if game.beatmap_id in mappool]
+        counts = {beatmap: beatmaps.count(beatmap) for beatmap in mappool}
+
+        return all(
+            (
+                count >= SETTINGS.tournament_info.ruleset.required_runs
+                for count in counts.values()
+            )
+        )
 
     def find_id(
         self,
         lookup: datetime.datetime,
         initial_delta_id: int = 15000,
         precision: float = 60,
-    ):
+    ) -> int:
         latest_lobby = self._get_latest_local_lobby()
 
         if latest_lobby.timestamp < lookup and not self.has_grabbed_live_lobby:

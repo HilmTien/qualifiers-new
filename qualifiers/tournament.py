@@ -4,16 +4,13 @@ from collections import defaultdict
 from ossapi import OssapiV1
 from ossapi.models import MatchGame
 
-from .tourney_ruleset import Ruleset
+from settings import SETTINGS
 
 
 class Tournament:
-    def __init__(
-        self, osu_api_v1: OssapiV1, mp_ids: list[int], ruleset: Ruleset
-    ) -> None:
+    def __init__(self, osu_api_v1: OssapiV1, mp_ids: list[int]) -> None:
         self.api = osu_api_v1
         self.mp_ids = mp_ids
-        self.ruleset = ruleset
 
         # TODO: UNIMPLEMENTED
         # self.teams: dict[str, str]  # player: team?
@@ -31,7 +28,7 @@ class Tournament:
                         score.user_id, user_type="id"
                     ).username
 
-                    if not self.ruleset.teams:
+                    if not SETTINGS.ruleset.teams:
                         results[player_name][beatmap_id] = max(
                             results[player_name][beatmap_id], score.score
                         )
