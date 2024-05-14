@@ -1,0 +1,7 @@
+processing 2024-05-11T17:00:00+00:00
+found 2024-05-11 17:00:00+00:00! CompleteLobby(lobby_info=<ossapi.ossapi.MatchInfo object at 0x00000194FFC00140>)
+lobby is complete
+processing 2024-05-11T16:00:00+00:00
+found 2024-05-11 16:00:00+00:00! PartialLobby(lobby_info=<ossapi.ossapi.MatchInfo object at 0x00000194FFC537D0>, faults={2904140: {4596246: 1, 4596266: 1, 4596251: 1, 4596544: 1, 4596267: 1, 4596253: 1, 4596249: 0, 4596248: 1, 4596261: 1, 4596258: 0}})
+lobby is incomplete!
+{2904140: {4596246: 1, 4596266: 1, 4596251: 1, 4596544: 1, 4596267: 1, 4596253: 1, 4596249: 0, 4596248: 1, 4596261: 1, 4596258: 0}}

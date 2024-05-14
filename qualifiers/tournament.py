@@ -4,7 +4,7 @@ from collections import defaultdict
 from ossapi import OssapiV1
 from ossapi.models import MatchGame
 
-from settings import SETTINGS
+from settings import MAPPOOL_FILE, RULESET, blank_user_scoring, get_data
 
 
 class Tournament:
@@ -16,19 +16,23 @@ class Tournament:
         # self.teams: dict[str, str]  # player: team?
 
     def generate_results(self):
-        results = defaultdict(lambda: defaultdict(int))
+        mappool: list[int] = get_data(MAPPOOL_FILE)
+        results = defaultdict(lambda: blank_user_scoring())
         for mp_id in self.mp_ids:
             mp_data: list[MatchGame] = self.api.get_match(mp_id).games
 
             for beatmap in mp_data:
                 beatmap_id = beatmap.beatmap_id
 
+                if beatmap_id not in mappool:
+                    continue
+
                 for score in beatmap.scores:
                     player_name = self.api.get_user(
                         score.user_id, user_type="id"
                     ).username
 
-                    if not SETTINGS.ruleset.teams:
+                    if not RULESET.teams:
                         results[player_name][beatmap_id] = max(
                             results[player_name][beatmap_id], score.score
                         )

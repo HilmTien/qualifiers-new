@@ -1,13 +1,16 @@
 import datetime
 import json
+from collections import defaultdict
 
-from ossapi.ossapi import MatchGame, MatchInfo, OssapiV1
+from ossapi.ossapi import Match, MatchGame, MatchInfo, MatchScore, OssapiV1
 
-from settings import SETTINGS, get_mappool
+from custom_types import Scoring
+from settings import ACRONYM, MAPPOOL_FILE, RULESET, blank_user_scoring, get_data
 from utils import get_absolute_path
 
 from .live_grabber import LiveGrabber
 from .lobby import Lobby
+from .tourney_lobby import CompleteLobby, PartialLobby, TournamentLobby
 
 SERVER = "irc.ppy.sh"
 PORT = 6667
@@ -17,11 +20,10 @@ class Grabber:
     def __init__(
         self,
         osu_api_v1: OssapiV1,
-        tournament_acronym: str = None,
         can_grab_live_lobby: bool = True,
     ) -> None:
         self.api = osu_api_v1
-        self.acronym = tournament_acronym.lower() if tournament_acronym else None
+        self.acronym = ACRONYM.lower()
 
         self.has_grabbed_live_lobby = not can_grab_live_lobby
 
@@ -30,19 +32,13 @@ class Grabber:
         scheduled_time: datetime.datetime,
         start_id: int,
         stop_time_offset: datetime.timedelta = datetime.timedelta(minutes=20),
-        stop_time_recursion_offset: datetime.timedelta = datetime.timedelta(minutes=5),
-    ) -> list[int]:
-        if self.acronym is None:
-            raise ValueError("Tournament acronym for grabber is not set!")
-
+    ) -> TournamentLobby:
         mp_id = start_id
         while True:
             try:
                 data = self.api.get_match(mp_id)
-            except KeyboardInterrupt:
-                return -1
-            except:
-                print("skipped", mp_id, "due to denied access")
+            except TypeError:
+                # print("skipped", mp_id, "due to denied access")
                 mp_id += 1
                 continue
 
@@ -54,36 +50,62 @@ class Grabber:
 
             index = lobby_name.lower().find(self.acronym)
             if index == 0:
-                if self.lobby_is_complete(data):
-                    return [mp_id]
-
-                return [
-                    mp_id,
-                ] + self.find_lobby(
-                    data.match.start_time,
-                    mp_id,
-                    (data.match.end_time - data.match.start_time)
-                    + stop_time_recursion_offset,
-                )
+                return self._return_lobby(data)
             elif index > 0:
-                print("sus: " + mp_id)
-                if input("verify id (y/n)").lower() == "y":
-                    return [mp_id]
+                print(f"sus: {mp_id} ({data.match.name})")
+                if input("verify id (y / n)").lower() == "y":
+                    return self._return_lobby(data)
 
             mp_id += 1
 
-    def lobby_is_complete(self, lobby: MatchInfo) -> bool:
-        mappool = get_mappool()
-        games: list[MatchGame] = lobby.games
-        beatmaps = [game.beatmap_id for game in games if game.beatmap_id in mappool]
-        counts = {beatmap: beatmaps.count(beatmap) for beatmap in mappool}
+    # UNUSED for now because most lobbies dont get separated
 
-        return all(
-            (
-                count >= SETTINGS.tournament_info.ruleset.required_runs
-                for count in counts.values()
-            )
-        )
+    # def find_lobby_partial(
+    #     self,
+    #     partial_match: Match,
+    #     stop_time_offset: datetime.timedelta = datetime.timedelta(minutes=5),
+    # ) -> list[int]:
+    #     return [
+    #         partial_match.match_id,
+    #     ] + self.find_lobby(
+    #         partial_match.start_time,
+    #         partial_match.match_id + 1,
+    #         (partial_match.end_time - partial_match.start_time) + stop_time_offset,
+    #     )
+
+    def _return_lobby(self, lobby: MatchInfo) -> TournamentLobby:
+        if self.lobby_is_complete(lobby):
+            return CompleteLobby(lobby)
+
+        faults = self._filter_faulty_runs(self.played_maps_count(lobby.games))
+        return PartialLobby(lobby, faults)
+
+    def _filter_faulty_runs(self, played_maps_count: Scoring) -> Scoring:
+        return {
+            user_id: play_count
+            for user_id, play_count in played_maps_count.items()
+            if 0 in play_count.values()
+        }
+
+    def played_maps_count(self, games: list[MatchGame]) -> Scoring:
+        mappool: list[int] = get_data(MAPPOOL_FILE)
+        played = blank_user_scoring()
+
+        for game in games:
+            scores: list[MatchScore] = game.scores
+
+            if game.beatmap_id not in mappool:
+                continue
+
+            for score in scores:
+                played[score.user_id][game.beatmap_id] += 1
+
+        return played
+
+    def lobby_is_complete(self, lobby: MatchInfo) -> bool:
+        played = self.played_maps_count(lobby.games)
+
+        return False if self._filter_faulty_runs(played) else True
 
     def find_id(
         self,
@@ -119,7 +141,7 @@ class Grabber:
                 guess_id = right_id - delta_id
                 guess = self.api.get_match(guess_id)
                 return Lobby(guess.match.start_time.isoformat(), guess_id)
-            except:
+            except TypeError:
                 delta_id += 1
 
     def _calc_id_slope(self, lobby_1: Lobby, lobby_2: Lobby):

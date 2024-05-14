@@ -1,36 +1,33 @@
-import os
 import sys
-from datetime import timedelta
 
-import ossapi
 from dotenv import load_dotenv
 
 from scripts import get_qualifier_lobbies
-from utils import get_absolute_path
+from utils import get_api
+
+
+def sandbox(api) -> None:
+    from grabber import Grabber
+
+    grabber = Grabber(api)
+
+    print(grabber.lobby_is_complete(api.get_match(113855673)))
 
 
 def main() -> None:
     load_dotenv()
 
-    assert len(sys.argv) > 1, "CLI arguments must be passed."
+    api = get_api()
 
-    osu_api_v1_key = os.environ.get("OSU_API_V1_KEY")
-    if osu_api_v1_key is None:
-        raise NameError("OSU_API_V1_KEY not found in .env!")
-
-    api = ossapi.OssapiV1(osu_api_v1_key)
+    assert (
+        len(sys.argv) == 2
+    ), "Entry point not given. Look for scripts in Pipfile and run using 'pipenv run ---', for example 'pipenv run get'"
 
     match sys.argv[1]:
         case "get":
-            assert (
-                7 <= len(sys.argv) <= 9
-            ), "wrong amounts of arguments to 'get', check get_qualifier_lobbies signature"
-            try:
-                sys.argv[7] = timedelta(minutes=sys.argv[7])
-                sys.argv[8] = timedelta(minutes=sys.argv[8])
-            except IndexError:
-                pass
-            get_qualifier_lobbies(api, *sys.argv[2:])
+            get_qualifier_lobbies(api)
+        case "sandbox":
+            sandbox(api)
 
 
 if __name__ == "__main__":
