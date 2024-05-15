@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from ossapi import OssapiV1
 
 from grabber import Grabber
-from grabber.tourney_lobby import CompleteLobby, PartialLobby
+from grabber.lobby_models import CompleteLobby, PartialLobby
 from settings import (
     ACRONYM,
     COMPLETED_FILE,
@@ -29,7 +29,7 @@ def get_qualifier_lobbies(api: OssapiV1):
     passed = []
     partials = []
 
-    grabber = Grabber(api, ACRONYM)
+    grabber = Grabber(api, ACRONYM, logger=log)
 
     for time_raw in schedule:
         print(f"processing {time_raw}")

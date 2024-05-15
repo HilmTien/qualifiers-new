@@ -31,6 +31,31 @@ def save_lobbies(passed: list[BeatmapID], save_path: str):
             json.dump(passed, savefile)
 
 
+def apply_fr(fractionals: list[float], target_sum: int) -> list[int]:
+    full = sum(fractionals)
+    percentages = [part / full for part in fractionals]
+    raw_values = [p * target_sum for p in percentages]
+    rounded_values = [round(v) for v in raw_values]
+    sum_rounded = sum(rounded_values)
+    diff = target_sum - sum_rounded
+
+    # Sort indices by the size of the fractional part of raw_values in descending order
+    fractional_indices = sorted(
+        range(len(raw_values)),
+        key=lambda i: raw_values[i] - int(raw_values[i]),
+        reverse=True,
+    )
+
+    # Adjust values to correct the sum
+    for i in range(abs(diff)):
+        if diff > 0:
+            rounded_values[fractional_indices[i]] += 1
+        elif diff < 0:
+            rounded_values[fractional_indices[i]] -= 1
+
+    return rounded_values
+
+
 @cache
 def get_api() -> OssapiV1:
     osu_api_v1_key = os.environ.get("OSU_API_V1_KEY")

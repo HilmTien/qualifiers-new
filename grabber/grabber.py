@@ -4,12 +4,11 @@ import json
 from ossapi.ossapi import MatchGame, MatchInfo, MatchScore, OssapiV1
 
 from custom_types import Scoring
-from settings import ACRONYM, MAPPOOL_FILE, blank_user_scoring, get_data
+from settings import ACRONYM, blank_user_scoring, get_mappool_info
 from utils import get_absolute_path
 
 from .live_grabber import LiveGrabber
-from .lobby import Lobby
-from .tourney_lobby import CompleteLobby, PartialLobby, TournamentLobby
+from .lobby_models import CompleteLobby, Lobby, PartialLobby, TournamentLobby
 
 SERVER = "irc.ppy.sh"
 PORT = 6667
@@ -20,11 +19,20 @@ class Grabber:
         self,
         osu_api_v1: OssapiV1,
         can_grab_live_lobby: bool = True,
+        logger: list[str] | None = None,
     ) -> None:
         self.api = osu_api_v1
         self.acronym = ACRONYM.lower()
 
         self.has_grabbed_live_lobby = not can_grab_live_lobby
+
+        self.logger = logger
+
+    def _log(self, message: str):
+        if self.logger is not None:
+            self.logger.append(message)
+
+        print(message)
 
     def find_lobby(
         self,
@@ -45,7 +53,7 @@ class Grabber:
                 raise LookupError("no lobby was found")
 
             lobby_name: str = data.match.name
-            print(lobby_name, mp_id, data.match.start_time)
+            self._log(lobby_name, mp_id, data.match.start_time)
 
             index = lobby_name.lower().find(self.acronym)
             if index == 0:
@@ -87,7 +95,7 @@ class Grabber:
         }
 
     def played_maps_count(self, games: list[MatchGame]) -> Scoring:
-        mappool: list[int] = get_data(MAPPOOL_FILE)
+        mappool, _ = get_mappool_info()
         played = blank_user_scoring()
 
         for game in games:
@@ -115,13 +123,14 @@ class Grabber:
         latest_lobby = self._get_latest_local_lobby()
 
         if latest_lobby.timestamp < lookup and not self.has_grabbed_live_lobby:
-            with LiveGrabber(self.api) as live_grabber:
+            with LiveGrabber(self.api, logger=self.logger) as live_grabber:
                 latest_lobby = live_grabber.get_latest_live_lobby()
 
             self.has_grabbed_live_lobby = True
 
         guess = self._get_guess(latest_lobby.mp_id, initial_delta_id)
         delta_time = (guess.timestamp - lookup).total_seconds()
+        self._log(f"guess: {guess.mp_id}, {guess.timestamp_raw}, {delta_time =}")
 
         while abs(delta_time) > precision:
             slope = self._calc_id_slope(guess, latest_lobby)
@@ -131,6 +140,7 @@ class Grabber:
 
             guess = self._get_guess(latest_lobby.mp_id, delta_id)
             delta_time = (guess.timestamp - lookup).total_seconds()
+            self._log(f"guess: {guess.mp_id}, {guess.timestamp_raw}, {delta_time =}")
 
         return guess.mp_id
 

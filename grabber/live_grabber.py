@@ -6,22 +6,30 @@ import time
 
 from ossapi import OssapiV1
 
-from utils import get_absolute_path, sign
+from utils import get_absolute_path
 
-from .lobby import Lobby
+from .lobby_models import Lobby
 
 IRC_SERVER = "irc.ppy.sh"
 IRC_PORT = 6667
 
 
 class LiveGrabber:
-    def __init__(self, osu_api_v1: OssapiV1) -> None:
+    def __init__(self, osu_api_v1: OssapiV1, logger: list[str] | None = None) -> None:
         self.api = osu_api_v1
 
         self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.username = os.environ.get("OSU_USERNAME")
         self.password = os.environ.get("OSU_IRC_PASSWORD")
+
+        self.logger = logger
+
+    def _log(self, message: str):
+        if self.logger is not None:
+            self.logger.append(message)
+
+        print(message)
 
     def get_latest_live_lobby(
         self, lobby_name: str = "tja", timeout: int = 10, save: bool = True
@@ -37,7 +45,7 @@ class LiveGrabber:
             text = self.irc.recv(2040).decode()
             # if "QUIT" in text:
             #     continue
-            # print(text)
+            self._log(text)
             if "https://osu.ppy.sh/mp/" in text:
                 lobby_data = {
                     "timestamp_raw": datetime.datetime.now(datetime.UTC).isoformat(),
