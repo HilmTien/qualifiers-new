@@ -1,6 +1,4 @@
-import os
-from collections import defaultdict
-
+import pandas as pd
 from ossapi import OssapiV1
 from ossapi.models import MatchGame
 
@@ -12,12 +10,14 @@ class Tournament:
         self.api = osu_api_v1
         self.mp_ids = mp_ids
 
+        self.results = self.get_results()
+
         # TODO: UNIMPLEMENTED
         # self.teams: dict[str, str]  # player: team?
 
-    def generate_results(self):
+    def get_results(self) -> pd.DataFrame:
         mappool: list[int] = get_data(MAPPOOL_FILE)
-        results = defaultdict(lambda: blank_user_scoring())
+        results = blank_user_scoring()
         for mp_id in self.mp_ids:
             mp_data: list[MatchGame] = self.api.get_match(mp_id).games
 
@@ -42,4 +42,10 @@ class Tournament:
                     #     if player_name in players:
                     #         res[team][beatmap_id] += int(score["score"])
 
-        return results
+        return pd.DataFrame(results)
+
+    def get_placements(self) -> pd.DataFrame:
+        return self.results.rank(axis=1, ascending=False).T
+
+    def get_overall_results(self) -> pd.Series:
+        return self.get_placements().sum(axis=1).rank()

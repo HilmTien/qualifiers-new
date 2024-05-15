@@ -10,6 +10,7 @@ sandbox = "python main.py sandbox"
 [packages]
 ossapi = "*"
 python-dotenv = "*"
+pandas = "*"
 
 [dev-packages]
 

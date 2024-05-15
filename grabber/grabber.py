@@ -1,11 +1,10 @@
 import datetime
 import json
-from collections import defaultdict
 
-from ossapi.ossapi import Match, MatchGame, MatchInfo, MatchScore, OssapiV1
+from ossapi.ossapi import MatchGame, MatchInfo, MatchScore, OssapiV1
 
 from custom_types import Scoring
-from settings import ACRONYM, MAPPOOL_FILE, RULESET, blank_user_scoring, get_data
+from settings import ACRONYM, MAPPOOL_FILE, blank_user_scoring, get_data
 from utils import get_absolute_path
 
 from .live_grabber import LiveGrabber

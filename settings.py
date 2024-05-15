@@ -5,13 +5,13 @@ from datetime import timedelta
 from typing import Any
 
 from custom_types import Scoring
-from qualifiers.tourney_ruleset import Ruleset
+from ruleset import Ruleset
 from utils import get_absolute_path
 
 # TOURNAMENT INFO
 
-TOURNAMENT_NAME = "prism-2024"
-ACRONYM = "prism"
+TOURNAMENT_NAME = "o!nt-4"
+ACRONYM = "o!nt"
 RULESET = Ruleset(teams=False, required_runs=1, runs=2)
 
 

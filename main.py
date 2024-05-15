@@ -7,11 +7,11 @@ from utils import get_api
 
 
 def sandbox(api) -> None:
-    from grabber import Grabber
+    from qualifiers.tournament import Tournament
 
-    grabber = Grabber(api)
+    t = Tournament(api, [112310075, 112307988])
 
-    print(grabber.lobby_is_complete(api.get_match(113855673)))
+    print(t.get_results())
 
 
 def main() -> None:
