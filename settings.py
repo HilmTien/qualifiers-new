@@ -9,8 +9,8 @@ from utils import get_absolute_path
 
 # TOURNAMENT INFO
 
-TOURNAMENT_NAME = "o!nt-4"
-ACRONYM = "o!nt"
+TOURNAMENT_NAME = "ttf-2024"
+ACRONYM = "ttf"
 RULESET = Ruleset(teams=False, required_runs=1, runs=2)
 
 
@@ -23,6 +23,7 @@ MAPPOOL_FILE = "mappool.json"
 SCHEDULE_FILE = "schedule.json"
 
 # GENERATED
+RESULTS_FILE = "results.json"
 COMPLETED_FILE = "lobbies.json"
 PARTIALS_FILE = "partials.json"
 FAILED_FILE = "failed.json"

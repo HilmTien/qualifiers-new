@@ -4,15 +4,27 @@ import pandas as pd
 from ossapi import OssapiV1
 from ossapi.models import MatchGame
 
-from settings import RULESET, blank_user_scoring, get_mappool_info
-from utils import apply_fr
+from settings import (RESULTS_FILE, RULESET, blank_user_scoring, get_data,
+                      get_mappool_info, get_path)
+from utils import apply_fr, get_scoring_from_json
 
 
 class Tournament:
-    def __init__(self, osu_api_v1: OssapiV1, mp_ids: list[int], use_username: bool = False) -> None:
+    def __init__(
+        self,
+        osu_api_v1: OssapiV1,
+        mp_ids: list[int],
+        use_username: bool = False,
+        load_local_results: bool = True,
+        use_local_only: bool = False
+    ) -> None:
         self.api = osu_api_v1
         self.mp_ids = mp_ids
         self.use_username = use_username
+        self.load_local_results = load_local_results
+        self.use_local_only = use_local_only
+
+        self._id_results = None
 
         self.mappool, self.alias_mapping = get_mappool_info()
 
@@ -22,7 +34,15 @@ class Tournament:
     @cached_property
     def results(self) -> pd.DataFrame:
         results = blank_user_scoring()
+
+        if self.load_local_results:
+            local_results = get_data(RESULTS_FILE)
+            results.update(get_scoring_from_json(local_results))
+            
         for mp_id in self.mp_ids:
+            if self.use_local_only:
+                break
+
             mp_data: list[MatchGame] = self.api.get_match(mp_id).games
 
             for beatmap in mp_data:
@@ -33,10 +53,6 @@ class Tournament:
 
                 for score in beatmap.scores:
                     player_name = score.user_id
-                    if self.use_username:
-                        player_name = self.api.get_user(
-                            score.user_id, user_type="id"
-                        ).username
 
                     if not RULESET.teams:
                         results[player_name][beatmap_id] = max(
@@ -47,6 +63,10 @@ class Tournament:
                     # for team, players in teams.items():
                     #     if player_name in players:
                     #         res[team][beatmap_id] += int(score["score"])
+
+        if self.use_username:
+            self._id_results = pd.DataFrame(results)
+            results = {self.api.get_user(user, user_type="id").username: scoring for user, scoring in results.items()}
 
         return pd.DataFrame(results)
 
@@ -98,7 +118,7 @@ class Tournament:
             seed_points = (seed_below_points + len(self.mappool) * (len(self.results.columns) + 1)) // 2
 
         map_placements = apply_fr(distribution, seed_points)
-        print(seed_points, map_placements, sum(map_placements))
+        # print(seed_points, map_placements, sum(map_placements))
         scores = []
 
         match self.alias_mapping:
@@ -106,8 +126,13 @@ class Tournament:
             case list(): mappool = self.alias_mapping
 
         for placement, map_id in zip(map_placements, mappool):
-            print(placement, map_id)
+            # print(placement, map_id)
             scores.append(self.results.T[map_id].nlargest(placement).iloc[-1])
         
         return scores
 
+    def save_results(self) -> None:
+        if self._id_results is None:
+            self.results.to_json(get_path(RESULTS_FILE))
+        else:
+            self._id_results.to_json(get_path(RESULTS_FILE))

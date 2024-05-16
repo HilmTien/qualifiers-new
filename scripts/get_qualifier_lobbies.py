@@ -37,7 +37,8 @@ def get_qualifier_lobbies(api: OssapiV1):
 
         time = datetime.fromisoformat(time_raw).replace(tzinfo=UTC)
 
-        initial_id = grabber.find_id(time - TIME_BEFORE_SCHEDULE)
+        # initial_id = grabber.find_id(time - TIME_BEFORE_SCHEDULE)
+        initial_id = 113899618
 
         try:
             found = grabber.find_lobby(time, initial_id, MAX_TIME_AFTER_SCHEDULE)
@@ -59,7 +60,7 @@ def get_qualifier_lobbies(api: OssapiV1):
             failed.append(time_raw)
             continue
 
-    with open(get_path(LOG_FILE), "w") as log_file:
+    with open(get_path(LOG_FILE), "w", encoding="utf-8") as log_file:
         log_file.write("\n".join(log))
 
     save_lobbies(passed, get_path(COMPLETED_FILE))

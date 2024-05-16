@@ -9,11 +9,19 @@ from utils import get_api
 def sandbox(api) -> None:
     from qualifiers.tournament import Tournament
 
-    t = Tournament(api, [112310075, 112307988], use_username=False)
+    t = Tournament(
+        api,
+        [113899621],
+        use_username=True,
+        load_local_results=True,
+        use_local_only=True,
+    )
 
     # print(t.results)
 
-    print(t.get_scores_for_seed(3, [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2]))
+    print(t.results)
+    print(t.get_scores_for_seed(1, [4, 1, 2, 1, 6, 5, 5, 6]))
+    t.save_results()
 
 
 def main() -> None:

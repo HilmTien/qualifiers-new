@@ -1,0 +1,7 @@
+processing 2024-05-16T05:00:00+00:00
+末日时在做什么？有没有空？可以来osu吗	113899618	2024-05-16 04:51:43+00:00
+HairyBum's game	113899619	2024-05-16 04:51:44+00:00
+LightArevlo's game	113899620	2024-05-16 04:51:50+00:00
+TTF Qualifiers Lobby S1	113899621	2024-05-16 04:51:52+00:00
+found 2024-05-16 05:00:00+00:00! CompleteLobby(lobby_info=<ossapi.ossapi.MatchInfo object at 0x000002ACFFDA85F0>)
+lobby is complete

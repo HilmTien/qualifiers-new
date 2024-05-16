@@ -53,7 +53,7 @@ class Grabber:
                 raise LookupError("no lobby was found")
 
             lobby_name: str = data.match.name
-            self._log(lobby_name, mp_id, data.match.start_time)
+            self._log(f"{lobby_name}\t{mp_id}\t{data.match.start_time}")
 
             index = lobby_name.lower().find(self.acronym)
             if index == 0:

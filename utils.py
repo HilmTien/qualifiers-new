@@ -6,7 +6,7 @@ from typing import Literal
 
 from ossapi import OssapiV1
 
-from custom_types import BeatmapID
+from custom_types import JSON, BeatmapID, Scoring
 
 
 def get_absolute_path(file_path: str, *relative_path: str) -> str:
@@ -53,7 +53,24 @@ def apply_fr(fractionals: list[float], target_sum: int) -> list[int]:
         elif diff < 0:
             rounded_values[fractional_indices[i]] -= 1
 
+    rounded_values = fill_zeros(rounded_values)
+
     return rounded_values
+
+
+def fill_zeros(arr: list[int]) -> list[int]:
+    total = sum(arr)
+    if total < len(arr):
+        raise ValueError("Impossible to fill zeros without creating other zeros")
+    elif total == len(arr):
+        return [1 for _ in range(len(arr))]
+
+    while any((i == 0 for i in arr)):
+        loan_i = arr.index(max(arr))
+        arr[loan_i] -= 1
+        arr[arr.index(0)] += 1
+
+    return arr
 
 
 @cache
@@ -63,6 +80,13 @@ def get_api() -> OssapiV1:
         raise NameError("OSU_API_V1_KEY not found in .env!")
 
     return OssapiV1(osu_api_v1_key)
+
+
+def get_scoring_from_json(data: JSON) -> Scoring:
+    return {
+        int(user): {int(beatmap_id): score for beatmap_id, score in scoring.items()}
+        for user, scoring in data.items()
+    }
 
 
 def make_schedule_json(datetimes: list[datetime], tournament_name: str):
