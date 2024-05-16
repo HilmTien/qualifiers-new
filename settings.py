@@ -8,8 +8,8 @@ from ruleset import Ruleset
 from utils import get_absolute_path
 
 # TOURNAMENT INFO
-TOURNAMENT_NAME = "prism-2024"
-ACRONYM = "prism"
+TOURNAMENT_NAME = "ttf-2024"
+ACRONYM = "ttf"
 RULESET = Ruleset(teams=False, required_runs=1, runs=2, must_be_complete=False)
 
 
@@ -35,7 +35,6 @@ MAX_TIME_AFTER_SCHEDULE = timedelta(minutes=10)
 
 
 # PARSE BEHAVIOUR
-
 USE_USERNAME = True
 LOAD_LOCAL_RESULTS = True
 USE_LOCAL_ONLY = False

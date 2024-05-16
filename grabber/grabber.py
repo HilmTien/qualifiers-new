@@ -4,7 +4,7 @@ import json
 from ossapi.ossapi import MatchGame, MatchInfo, MatchScore, OssapiV1
 
 from custom_types import Scoring
-from settings import ACRONYM, blank_user_scoring, get_mappool_info
+from settings import ACRONYM, RULESET, blank_user_scoring, get_mappool_info
 from utils import get_absolute_path
 
 from .live_grabber import LiveGrabber
@@ -91,7 +91,8 @@ class Grabber:
         return {
             user_id: play_count
             for user_id, play_count in played_maps_count.items()
-            if 0 in play_count.values()
+            # if 0 in play_count.values()
+            if any((count < RULESET.required_runs for count in play_count.values()))
         }
 
     def played_maps_count(self, games: list[MatchGame]) -> Scoring:
