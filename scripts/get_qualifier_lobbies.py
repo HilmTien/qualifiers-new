@@ -37,8 +37,7 @@ def get_qualifier_lobbies(api: OssapiV1):
 
         time = datetime.fromisoformat(time_raw).replace(tzinfo=UTC)
 
-        # initial_id = grabber.find_id(time - TIME_BEFORE_SCHEDULE)
-        initial_id = 113899618
+        initial_id = grabber.find_id(time - TIME_BEFORE_SCHEDULE)
 
         try:
             found = grabber.find_lobby(time, initial_id, MAX_TIME_AFTER_SCHEDULE)
