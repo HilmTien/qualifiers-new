@@ -2,26 +2,12 @@ import sys
 
 from dotenv import load_dotenv
 
-from scripts import get_qualifier_lobbies
+from scripts import get_qualifier_lobbies, get_results
 from utils import get_api
 
 
 def sandbox(api) -> None:
-    from qualifiers.tournament import Tournament
-
-    t = Tournament(
-        api,
-        [113899621],
-        use_username=True,
-        load_local_results=True,
-        use_local_only=True,
-    )
-
-    # print(t.results)
-
-    print(t.results)
-    print(t.get_scores_for_seed(1, [4, 1, 2, 1, 6, 5, 5, 6]))
-    t.save_results()
+    pass
 
 
 def main() -> None:
@@ -36,6 +22,8 @@ def main() -> None:
     match sys.argv[1]:
         case "get":
             get_qualifier_lobbies(api)
+        case "parse":
+            get_results(api)
         case "sandbox":
             sandbox(api)
 

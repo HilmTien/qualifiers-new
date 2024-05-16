@@ -130,7 +130,7 @@ class Grabber:
 
         guess = self._get_guess(latest_lobby.mp_id, initial_delta_id)
         delta_time = (guess.timestamp - lookup).total_seconds()
-        self._log(f"guess: {guess.mp_id}, {guess.timestamp_raw}, {delta_time =}")
+        self._log(f"guess: {guess.mp_id}, {guess.timestamp_raw}, {delta_time = }")
 
         while abs(delta_time) > precision:
             slope = self._calc_id_slope(guess, latest_lobby)
@@ -140,7 +140,7 @@ class Grabber:
 
             guess = self._get_guess(latest_lobby.mp_id, delta_id)
             delta_time = (guess.timestamp - lookup).total_seconds()
-            self._log(f"guess: {guess.mp_id}, {guess.timestamp_raw}, {delta_time =}")
+            self._log(f"guess: {guess.mp_id}, {guess.timestamp_raw}, {delta_time = }")
 
         return guess.mp_id
 

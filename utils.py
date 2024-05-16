@@ -31,9 +31,18 @@ def save_lobbies(passed: list[BeatmapID], save_path: str):
             json.dump(passed, savefile)
 
 
-def apply_fr(fractionals: list[float], target_sum: int) -> list[int]:
-    full = sum(fractionals)
-    percentages = [part / full for part in fractionals]
+def apply_fr(
+    fractionals: list[float] | dict[str, int], target_sum: int
+) -> list[int] | dict[str, int]:
+    match fractionals:
+        case dict():
+            keys = list(fractionals.keys())
+            values = list(fractionals.values())
+        case list():
+            values = fractionals
+
+    full = sum(values)
+    percentages = [part / full for part in values]
     raw_values = [p * target_sum for p in percentages]
     rounded_values = [round(v) for v in raw_values]
     sum_rounded = sum(rounded_values)
@@ -55,7 +64,11 @@ def apply_fr(fractionals: list[float], target_sum: int) -> list[int]:
 
     rounded_values = fill_zeros(rounded_values)
 
-    return rounded_values
+    match fractionals:
+        case dict():
+            return {keys[i]: rounded_values[i] for i in range(len(keys))}
+        case list():
+            return rounded_values
 
 
 def fill_zeros(arr: list[int]) -> list[int]:

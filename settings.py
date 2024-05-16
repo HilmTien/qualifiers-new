@@ -8,14 +8,12 @@ from ruleset import Ruleset
 from utils import get_absolute_path
 
 # TOURNAMENT INFO
-
-TOURNAMENT_NAME = "ttf-2024"
-ACRONYM = "ttf"
-RULESET = Ruleset(teams=False, required_runs=1, runs=2)
+TOURNAMENT_NAME = "prism-2024"
+ACRONYM = "prism"
+RULESET = Ruleset(teams=False, required_runs=1, runs=2, must_be_complete=False)
 
 
 # DATA FILES
-
 DATA_PATH = get_absolute_path(__file__, "tournament_data", TOURNAMENT_NAME)
 
 # REQUIRED
@@ -26,15 +24,21 @@ SCHEDULE_FILE = "schedule.json"
 RESULTS_FILE = "results.json"
 COMPLETED_FILE = "lobbies.json"
 PARTIALS_FILE = "partials.json"
+PARTIAL_FAULTS_FILE = "faults.json"
 FAILED_FILE = "failed.json"
 LOG_FILE = "log.txt"
 
 
 # SEARCH BEHAVIOUR
-
 TIME_BEFORE_SCHEDULE = timedelta(minutes=15)
 MAX_TIME_AFTER_SCHEDULE = timedelta(minutes=10)
 
+
+# PARSE BEHAVIOUR
+
+USE_USERNAME = True
+LOAD_LOCAL_RESULTS = True
+USE_LOCAL_ONLY = False
 
 # ----- UTILS -----
 

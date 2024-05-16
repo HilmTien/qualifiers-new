@@ -11,6 +11,7 @@ from settings import (
     FAILED_FILE,
     LOG_FILE,
     MAX_TIME_AFTER_SCHEDULE,
+    PARTIAL_FAULTS_FILE,
     PARTIALS_FILE,
     SCHEDULE_FILE,
     TIME_BEFORE_SCHEDULE,
@@ -28,6 +29,8 @@ def get_qualifier_lobbies(api: OssapiV1):
     failed = []
     passed = []
     partials = []
+
+    faults = []
 
     grabber = Grabber(api, ACRONYM, logger=log)
 
@@ -49,6 +52,7 @@ def get_qualifier_lobbies(api: OssapiV1):
                 case PartialLobby():
                     log.append(f"lobby is incomplete!")
                     log.append(str(found.faults))
+                    faults.extend(found.faults.keys())
                     partials.append(found.lobby_info.match.match_id)
         except KeyboardInterrupt:
             log.append(f"aborted {time}")
@@ -64,6 +68,8 @@ def get_qualifier_lobbies(api: OssapiV1):
 
     save_lobbies(passed, get_path(COMPLETED_FILE))
     save_lobbies(partials, get_path(PARTIALS_FILE))
+
+    save_lobbies(faults, get_path(PARTIAL_FAULTS_FILE))
 
     with open(get_path(FAILED_FILE), "w") as failed_file:
         json.dump(failed, failed_file)

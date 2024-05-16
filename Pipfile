@@ -5,6 +5,7 @@ name = "pypi"
 
 [scripts]
 get = "python main.py get"
+parse = "python main.py parse"
 sandbox = "python main.py sandbox"
 
 [packages]
