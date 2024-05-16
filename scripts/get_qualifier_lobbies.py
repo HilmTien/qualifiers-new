@@ -34,11 +34,19 @@ def get_qualifier_lobbies(api: OssapiV1):
 
     grabber = Grabber(api, ACRONYM, logger=log)
 
-    for time_raw in schedule:
+    for time_raw, has_been_processed in schedule.items():
         print(f"processing {time_raw}")
         log.append(f"processing {time_raw}")
 
+        if has_been_processed:
+            print(f"{time_raw} has been processed already")
+            log.append(f"{time_raw} has been processed already")
+            continue
+
         time = datetime.fromisoformat(time_raw).replace(tzinfo=UTC)
+
+        if time > datetime.now(tz=UTC):
+            continue
 
         initial_id = grabber.find_id(time - TIME_BEFORE_SCHEDULE)
 
