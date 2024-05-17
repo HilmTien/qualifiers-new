@@ -18,3 +18,8 @@ class PartialLobby(TournamentLobby):
 @dataclass
 class CompleteLobby(TournamentLobby):
     pass
+
+
+@dataclass
+class OngoingLobby(TournamentLobby):
+    is_complete: bool

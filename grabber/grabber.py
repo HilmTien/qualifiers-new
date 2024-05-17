@@ -4,11 +4,23 @@ import json
 from ossapi.ossapi import MatchGame, MatchInfo, MatchScore, OssapiV1
 
 from custom_types import Scoring
-from settings import ACRONYM, RULESET, blank_user_scoring, get_mappool_info
+from settings import (
+    ACRONYM,
+    MAX_TIME_AFTER_SCHEDULE,
+    RULESET,
+    blank_user_scoring,
+    get_mappool_info,
+)
 from utils import get_absolute_path
 
 from .live_grabber import LiveGrabber
-from .lobby_models import CompleteLobby, Lobby, PartialLobby, TournamentLobby
+from .lobby_models import (
+    CompleteLobby,
+    Lobby,
+    OngoingLobby,
+    PartialLobby,
+    TournamentLobby,
+)
 
 SERVER = "irc.ppy.sh"
 PORT = 6667
@@ -38,7 +50,7 @@ class Grabber:
         self,
         scheduled_time: datetime.datetime,
         start_id: int,
-        stop_time_offset: datetime.timedelta = datetime.timedelta(minutes=20),
+        stop_time_offset: datetime.timedelta = MAX_TIME_AFTER_SCHEDULE,
     ) -> TournamentLobby:
         mp_id = start_id
         while True:
@@ -81,7 +93,12 @@ class Grabber:
     #     )
 
     def _return_lobby(self, lobby: MatchInfo) -> TournamentLobby:
-        if self.lobby_is_complete(lobby):
+        is_complete = self.lobby_is_complete(lobby)
+
+        if lobby.match.end_time is None:
+            return OngoingLobby(lobby, is_complete)
+
+        if is_complete:
             return CompleteLobby(lobby)
 
         faults = self._filter_faulty_runs(self.played_maps_count(lobby.games))
