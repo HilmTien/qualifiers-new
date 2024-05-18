@@ -1,7 +1,7 @@
 import json
 import os
 from collections import defaultdict
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from custom_types import JSON, BeatmapID, Scoring
 from ruleset import Ruleset
@@ -26,18 +26,19 @@ COMPLETED_FILE = "lobbies.json"
 PARTIALS_FILE = "partials.json"
 PARTIAL_FAULTS_FILE = "faults.json"
 FAILED_FILE = "failed.json"
-LOG_FILE = "log.txt"
+LOG_FILE = f"log-{datetime.now().strftime("%Y.%m.%d-%H.%M.%S")}.txt"
 
 
 # SEARCH BEHAVIOUR
-TIME_BEFORE_SCHEDULE = timedelta(minutes=15)
+TIME_BEFORE_SCHEDULE = timedelta(minutes=20)
 MAX_TIME_AFTER_SCHEDULE = timedelta(minutes=10)
+CAN_GRAB_LIVE_LOBBY = False
 
 
 # PARSE BEHAVIOUR
 USE_USERNAME = True
 LOAD_LOCAL_RESULTS = True
-USE_LOCAL_ONLY = False
+USE_LOCAL_ONLY = True
 
 # ----- UTILS -----
 

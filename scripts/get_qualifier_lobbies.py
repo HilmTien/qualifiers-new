@@ -53,24 +53,6 @@ def get_qualifier_lobbies(api: OssapiV1):
         try:
             found = grabber.find_lobby(time, initial_id)
             log.append(f"found {time}! {found}")
-            match found:
-                case CompleteLobby():
-                    log.append("lobby is complete")
-                    passed.append(found.lobby_info.match.match_id)
-                case PartialLobby():
-                    log.append("lobby is incomplete!")
-                    log.append(str(found.faults))
-                    faults.extend(found.faults.keys())
-                    partials.append(found.lobby_info.match.match_id)
-                case OngoingLobby():
-                    log.append("lobby is ongoing!")
-                    if found.is_complete:
-                        log.append("lobby is complete, will be added to lobbies")
-                        passed.append(found.lobby_info.match.match_id)
-                    else:
-                        log.append("no way to deduce completeness, marking as failed")
-                        failed.append(time_raw)
-
         except KeyboardInterrupt:
             log.append(f"aborted {time}")
             failed.append(time_raw)
@@ -79,6 +61,26 @@ def get_qualifier_lobbies(api: OssapiV1):
             log.append(f"did not find lobby for {time}")
             failed.append(time_raw)
             continue
+
+        match found:
+            case CompleteLobby():
+                log.append("lobby is complete")
+                passed.append(found.lobby_info.match.match_id)
+            case PartialLobby():
+                log.append("lobby is incomplete!")
+                log.append(str(found.faults))
+                faults.extend(found.faults.keys())
+                partials.append(found.lobby_info.match.match_id)
+            case OngoingLobby():
+                log.append("lobby is ongoing!")
+                if found.is_complete:
+                    log.append("lobby is complete, will be added to lobbies")
+                    passed.append(found.lobby_info.match.match_id)
+                else:
+                    log.append("no way to deduce completeness, marking as failed")
+                    failed.append(time_raw)
+
+        schedule[time_raw] = True
 
     with open(get_path(LOG_FILE), "w", encoding="utf-8") as log_file:
         log_file.write("\n".join(log))
@@ -90,3 +92,6 @@ def get_qualifier_lobbies(api: OssapiV1):
 
     with open(get_path(FAILED_FILE), "w") as failed_file:
         json.dump(failed, failed_file)
+
+    with open(get_path(SCHEDULE_FILE), "w") as schedule_file:
+        json.dump(schedule, schedule_file)

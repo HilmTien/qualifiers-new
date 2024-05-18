@@ -10,9 +10,10 @@ def get_results(api: OssapiV1):
     t = Tournament(api, mp_ids)
 
     print(t.results)
+    print(t.results.T)
     print(
         t.get_scores_for_seed(
-            1,
+            3,
             {
                 "NM1": 3,
                 "NM2": 1,

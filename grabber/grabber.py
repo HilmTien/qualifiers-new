@@ -6,6 +6,7 @@ from ossapi.ossapi import MatchGame, MatchInfo, MatchScore, OssapiV1
 from custom_types import Scoring
 from settings import (
     ACRONYM,
+    CAN_GRAB_LIVE_LOBBY,
     MAX_TIME_AFTER_SCHEDULE,
     RULESET,
     blank_user_scoring,
@@ -30,13 +31,12 @@ class Grabber:
     def __init__(
         self,
         osu_api_v1: OssapiV1,
-        can_grab_live_lobby: bool = True,
         logger: list[str] | None = None,
     ) -> None:
         self.api = osu_api_v1
         self.acronym = ACRONYM.lower()
 
-        self.has_grabbed_live_lobby = not can_grab_live_lobby
+        self.has_grabbed_live_lobby = not CAN_GRAB_LIVE_LOBBY
 
         self.logger = logger
 
