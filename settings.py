@@ -4,13 +4,13 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 
 from custom_types import JSON, BeatmapID, Scoring
-from ruleset import Ruleset
+from ruleset import GameMode, Ruleset
 from utils import get_absolute_path
 
 # TOURNAMENT INFO
 TOURNAMENT_NAME = "ttf-2024"
 ACRONYM = "ttf"
-RULESET = Ruleset(teams=False, required_runs=1, runs=2, must_be_complete=False)
+RULESET = Ruleset(gamemode=GameMode.TAIKO, teams=False, required_runs=1, runs=2, must_be_complete=True)
 
 
 # DATA FILES
@@ -30,13 +30,13 @@ LOG_FILE = f"log-{datetime.now().strftime("%Y.%m.%d-%H.%M.%S")}.txt"
 
 
 # SEARCH BEHAVIOUR
-TIME_BEFORE_SCHEDULE = timedelta(minutes=20)
+TIME_BEFORE_SCHEDULE = timedelta(minutes=15)
 MAX_TIME_AFTER_SCHEDULE = timedelta(minutes=10)
 CAN_GRAB_LIVE_LOBBY = False
 
 
 # PARSE BEHAVIOUR
-USE_USERNAME = True
+USE_USERNAME = False
 LOAD_LOCAL_RESULTS = True
 USE_LOCAL_ONLY = True
 

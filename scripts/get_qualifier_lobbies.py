@@ -32,7 +32,9 @@ def get_qualifier_lobbies(api: OssapiV1):
 
     faults = []
 
-    grabber = Grabber(api, ACRONYM, logger=log)
+    print(log)
+
+    grabber = Grabber(api, logger=log)
 
     for time_raw, has_been_processed in schedule.items():
         print(f"processing {time_raw}")

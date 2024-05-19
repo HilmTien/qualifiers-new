@@ -73,7 +73,7 @@ class Tournament:
 
         if USE_USERNAME:
             self._id_results = pd.DataFrame(results)
-            results = {self.api.get_user(user, user_type="id").username: scoring for user, scoring in results.items()}
+            results = {self.api.get_user(user, user_type="id", mode=1).username: scoring for user, scoring in results.items()}
 
         return pd.DataFrame(results)
 
@@ -81,7 +81,7 @@ class Tournament:
         return self.results.rank(axis=1, method="min", ascending=False).T.astype(int)
 
     def get_overall_results(self) -> pd.Series:
-        return self.get_placements().sum(axis=1).rank()
+        return self.get_placements().sum(axis=1).rank().sort_values()
 
     def get_required_score(self, index: str | int, placement: int) -> int:
         match index:
@@ -126,6 +126,8 @@ class Tournament:
 
         map_placements = apply_fr(distribution, seed_points)
         # print(seed_points, map_placements, sum(map_placements))
+
+        print(f"Using weights: {map_placements}")
 
         match map_placements:
             case dict():

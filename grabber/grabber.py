@@ -38,11 +38,11 @@ class Grabber:
 
         self.has_grabbed_live_lobby = not CAN_GRAB_LIVE_LOBBY
 
-        self.logger = logger
+        self._logger = logger
 
     def _log(self, message: str):
-        if self.logger is not None:
-            self.logger.append(message)
+        if self._logger is not None:
+            self._logger.append(message)
 
         print(message)
 
@@ -141,7 +141,7 @@ class Grabber:
         latest_lobby = self._get_latest_local_lobby()
 
         if latest_lobby.timestamp < lookup and not self.has_grabbed_live_lobby:
-            with LiveGrabber(self.api, logger=self.logger) as live_grabber:
+            with LiveGrabber(self.api, logger=self._logger) as live_grabber:
                 latest_lobby = live_grabber.get_latest_live_lobby()
 
             self.has_grabbed_live_lobby = True
