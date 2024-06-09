@@ -1,3 +1,4 @@
+import json
 from functools import cached_property
 
 import pandas as pd
@@ -5,6 +6,7 @@ from ossapi import OssapiV1
 from ossapi.models import MatchGame
 
 from settings import (
+    ID_USERNAME_MAPPING_FILE,
     LOAD_LOCAL_RESULTS,
     PARTIAL_FAULTS_FILE,
     RESULTS_FILE,
@@ -72,8 +74,22 @@ class Tournament:
                     #         res[team][beatmap_id] += int(score["score"])
 
         if USE_USERNAME:
-            self._id_results = pd.DataFrame(results)
-            results = {self.api.get_user(user, user_type="id", mode=1).username: scoring for user, scoring in results.items()}
+            id_results = results
+            self._id_results = pd.DataFrame(id_results)
+
+            results = {}
+            id_username_map = get_data(ID_USERNAME_MAPPING_FILE)
+            for user, scoring in id_results.items():
+                if str(user) in id_username_map:
+                    username = id_username_map[str(user)]
+                else:
+                    username = self.api.get_user(user, user_type="id", mode=RULESET.gamemode).username
+                    id_username_map[str(user)] = username 
+
+                results[username] = scoring
+
+            with open(get_path(ID_USERNAME_MAPPING_FILE), "w") as players_file:
+                json.dump(id_username_map, players_file)
 
         return pd.DataFrame(results)
 

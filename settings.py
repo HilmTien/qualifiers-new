@@ -8,9 +8,9 @@ from ruleset import GameMode, Ruleset
 from utils import get_absolute_path
 
 # TOURNAMENT INFO
-TOURNAMENT_NAME = "ttf-2024"
-ACRONYM = "ttf"
-RULESET = Ruleset(gamemode=GameMode.TAIKO, teams=False, required_runs=1, runs=2, must_be_complete=True)
+TOURNAMENT_NAME = "btt-2024"
+ACRONYM = "BTTS9"
+RULESET = Ruleset(gamemode=GameMode.TAIKO, teams=False, required_runs=1, runs=2, must_be_complete=False)
 
 
 # DATA FILES
@@ -21,6 +21,7 @@ MAPPOOL_FILE = "mappool.json"
 SCHEDULE_FILE = "schedule.json"
 
 # GENERATED
+ID_USERNAME_MAPPING_FILE = "players.json"
 RESULTS_FILE = "results.json"
 COMPLETED_FILE = "lobbies.json"
 PARTIALS_FILE = "partials.json"
@@ -36,7 +37,7 @@ CAN_GRAB_LIVE_LOBBY = False
 
 
 # PARSE BEHAVIOUR
-USE_USERNAME = False
+USE_USERNAME = True
 LOAD_LOCAL_RESULTS = True
 USE_LOCAL_ONLY = True
 
